@@ -15,10 +15,17 @@ export default {
 </template>
 
 <style lang="less">
-.app {
+* {
   padding: 0;
   margin: 0;
   font-family: Arial;
   list-style: none;
+}
+
+.app {
+  box-sizing: border-box;
+  height: 100vh;
+  padding: 16px;
+  overflow-y: auto;
 }
 </style>
