@@ -79,8 +79,7 @@ export default {
           this.getChancesOfRain()
           this.isLoading = false
         })
-        .catch((err) => {
-          console.error(err)
+        .catch(() => {
           this.isLoading = false
         })
     },
@@ -176,7 +175,7 @@ export default {
         </Box>
       </div>
 
-      <div class="weather__item weather__item_first">
+      <div class="weather__item weather__item_order_first">
         <div class="weather__stub" v-if="isLoading">Loading</div>
         <Box
           class="weather__box"
@@ -202,7 +201,7 @@ export default {
         </Box>
       </div>
 
-      <div class="weather__item weather__item_second">
+      <div class="weather__item weather__item_order_second">
         <div class="weather__stub" v-if="isLoading">Loading</div>
         <Box
           class="weather__box"
@@ -246,11 +245,11 @@ export default {
       padding: 6px 0;
     }
 
-    &__item_first {
+    &__item_order_first {
       order: 1;
     }
 
-    &__item_second {
+    &__item_order_second {
       order: 2;
     }
   }
