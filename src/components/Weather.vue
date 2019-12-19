@@ -3,7 +3,8 @@ import debounce from 'lodash.debounce'
 
 import Box from './Box'
 import Slider from './Slider'
-import Bar from './Bar'
+import ChartBar from './ChartBar'
+import ChartLine from './ChartLine'
 import ApiService from '../services/ApiService'
 
 const PRESSURE_SETTINGS = {
@@ -25,6 +26,7 @@ const TEMPERATURE_CONSTANT = 9
 const DEBOUNCE_DELAY = 200
 
 const MAIN_COLOR = '#181ED9'
+const SECONDARY_COLOR = '#A9B3FC'
 
 export default {
   name: 'Weather',
@@ -32,7 +34,8 @@ export default {
   components: {
     Box,
     Slider,
-    Bar
+    ChartBar,
+    ChartLine
   },
 
   data () {
@@ -40,6 +43,7 @@ export default {
       pressure: PRESSURE_DEFAULT,
       temperature: TEMPERATURE_DEFAULT,
       rainfallChartData: null,
+      rainChancesChartData: null,
       isLoading: false
     }
   },
@@ -63,17 +67,16 @@ export default {
   },
 
   beforeMount () {
+    this.isLoading = true
     this.getRainfallChart()
   },
 
   methods: {
     getRainfallChart () {
-      this.isLoading = true
-
       ApiService.getRainfallChart()
         .then(({ data }) => {
           this.combineRainfallChartData(data[0])
-          this.getChanceOfRain()
+          this.getChancesOfRain()
           this.isLoading = false
         })
         .catch((err) => {
@@ -98,8 +101,51 @@ export default {
 
       this.rainfallChartData = rainfallChartData
     },
-    getChanceOfRain () {
-      this.countRainChances()
+    getChancesOfRain () {
+      const rainfallData = this.rainfallChartData
+
+      if (!rainfallData) return
+
+      const rainChancesChartData = {
+        header: 'Chance of rain',
+        labels: rainfallData.labels
+      }
+
+      const [lowerArray, mainArray, upperArray] = [[], [], []]
+
+      rainfallData.dataArray.forEach((item, index) => {
+        const value = this.countRainChances(item)
+        // const day = index + 1
+        // lowerArray.push([day, value[0].toFixed(2)])
+        // mainArray.push([day, value[1].toFixed(2)])
+        // upperArray.push([day, value[2].toFixed(2)])
+        lowerArray.push(value[0].toFixed(2))
+        mainArray.push(value[1].toFixed(2))
+        upperArray.push(value[2].toFixed(2))
+      })
+
+      rainChancesChartData.linesArray = [
+        {
+          borderColor: SECONDARY_COLOR,
+          data: lowerArray,
+          label: 'Lower',
+          fill: '+2'
+        },
+        {
+          borderColor: MAIN_COLOR,
+          data: mainArray,
+          label: 'Mean',
+          fill: false
+        },
+        {
+          borderColor: SECONDARY_COLOR,
+          data: upperArray,
+          label: 'Upper',
+          fill: '-2'
+        }
+      ]
+
+      this.rainChancesChartData = rainChancesChartData
     },
     countRainChances (amount = 0) {
       const score = Math.log(amount + 1) * Math.log(this.pressure - PRESSURE_CONSTANT) * Math.log(this.temperature - TEMPERATURE_CONSTANT)
@@ -130,14 +176,14 @@ export default {
         </Box>
       </div>
 
-      <div class="weather__item">
+      <div class="weather__item weather__item_first">
         <div class="weather__stub" v-if="isLoading">Loading</div>
         <Box
           class="weather__box"
-          v-else-if="rainfallChartData"
-          :header="rainfallChartData.header"
+          v-else-if="rainChancesChartData"
+          :header="rainChancesChartData.header"
         >
-          <Bar :bar-data="rainfallChartData" />
+          <ChartLine :line-data="rainChancesChartData" />
         </Box>
         <div class="weather__stub" v-else>No data is available</div>
       </div>
@@ -154,6 +200,18 @@ export default {
             v-model="temperature"
           />
         </Box>
+      </div>
+
+      <div class="weather__item weather__item_second">
+        <div class="weather__stub" v-if="isLoading">Loading</div>
+        <Box
+          class="weather__box"
+          v-else-if="rainfallChartData"
+          :header="rainfallChartData.header"
+        >
+          <ChartBar :bar-data="rainfallChartData" />
+        </Box>
+        <div class="weather__stub" v-else>No data is available</div>
       </div>
     </div>
   </div>
@@ -178,8 +236,23 @@ export default {
     box-sizing: border-box;
     flex: 0 0 50%;
     width: 50%;
-    max-height: 200px;
     padding: 12px;
+  }
+
+  @media screen and (max-width: 640px) {
+    &__item {
+      flex: 0 0 100%;
+      width: 100%;
+      padding: 6px 0;
+    }
+
+    &__item_first {
+      order: 1;
+    }
+
+    &__item_second {
+      order: 2;
+    }
   }
 }
 </style>

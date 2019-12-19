@@ -18,16 +18,6 @@ export default {
     value: { type: Number }
   },
 
-  computed: {
-    isIE () {
-      if (!window.navigator || !window.navigator.userAgent) return
-
-      const ua = window.navigator.userAgent
-
-      return ua.indexOf('MSIE ') >= 0
-    }
-  },
-
   watch: {
     value (newValue) {
       this.updateRange(newValue)
@@ -40,7 +30,6 @@ export default {
 
   methods: {
     emitInput (event) {
-      console.log('input')
       this.$emit('input', +event.target.value)
       this.updateRange()
     },

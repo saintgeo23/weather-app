@@ -14,7 +14,7 @@ export default {
 
 <template>
   <div class="box">
-    <div class="box__header">{{ header }}{{ value === undefined ? '' : `: ${value}` }}</div>
+    <div class="box__header" v-if="header.length">{{ header }}{{ value === undefined ? '' : `: ${value}` }}</div>
 
     <div class="box__wrapper">
       <slot />
@@ -24,6 +24,8 @@ export default {
 
 <style lang="less">
 .box {
-  position: relative;
+  &__wrapper {
+    position: relative;
+  }
 }
 </style>
