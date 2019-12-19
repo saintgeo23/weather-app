@@ -1,4 +1,6 @@
-# wthr
+# Weather app
+
+## The applicaton is deployed onto https://weather-app-volokitin.surge.sh
 
 ## Project setup
 ```
